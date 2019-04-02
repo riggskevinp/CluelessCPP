@@ -71,7 +71,7 @@
                          </base-DElement>
                          <object>{efdb1b4e-e5d6-4060-a3fa-ba33f11c8af0}</object>
                          <name>Player</name>
-                         <pos>x:465;y:155</pos>
+                         <pos>x:215;y:295</pos>
                          <rect>x:-60;y:-50;w:120;h:100</rect>
                          <auto-sized>false</auto-sized>
                          <visual-role>0</visual-role>
@@ -93,7 +93,7 @@
                          </base-DElement>
                          <object>{23c9b5d4-16aa-40db-9496-7c5c84b6f60a}</object>
                          <name>Client</name>
-                         <pos>x:245;y:585</pos>
+                         <pos>x:940;y:160</pos>
                          <rect>x:-85;y:-65;w:170;h:130</rect>
                          <auto-sized>false</auto-sized>
                          <visual-role>0</visual-role>
@@ -105,7 +105,7 @@
                     </item>
                    </qlist>
                   </elements>
-                  <last-modified>1554221761039</last-modified>
+                  <last-modified>1554246581006</last-modified>
                   <toolbarid>General</toolbarid>
                  </MDiagram>
                 </base-MDiagram>
@@ -173,14 +173,14 @@
                  <qlist>
                   <item>
                    <MClassMember>
-                    <uid>{69d29172-3bb9-498d-8071-c01f347d1963}</uid>
+                    <uid>{2231d8a4-fff4-4610-9657-c133a31d2105}</uid>
                     <type>1</type>
                     <declaration>clientconnection</declaration>
                    </MClassMember>
                   </item>
                   <item>
                    <MClassMember>
-                    <uid>{eba3db0a-0c0f-41f6-8d42-99630ea9cbbb}</uid>
+                    <uid>{0de64a84-50f3-4800-889a-496d279c4e1e}</uid>
                     <type>2</type>
                     <declaration>sendMessage()</declaration>
                    </MClassMember>
@@ -212,21 +212,21 @@
                  <qlist>
                   <item>
                    <MClassMember>
-                    <uid>{822d1224-c232-4479-91bf-c11803e01b98}</uid>
+                    <uid>{f0057c9f-a079-48de-a7f8-0a87e97dd8da}</uid>
                     <type>1</type>
                     <declaration>hostConnection</declaration>
                    </MClassMember>
                   </item>
                   <item>
                    <MClassMember>
-                    <uid>{9c694e59-7413-45c9-b4a0-3c39f43e9a5b}</uid>
+                    <uid>{96907ab1-b44e-426f-a51f-302f741045fa}</uid>
                     <type>2</type>
                     <declaration>sendMessage()</declaration>
                    </MClassMember>
                   </item>
                   <item>
                    <MClassMember>
-                    <uid>{1ad587d3-6952-4617-9751-85ffc7636607}</uid>
+                    <uid>{464aab33-a489-48f0-93f9-be81eaebf471}</uid>
                     <type>2</type>
                     <declaration>receiveMessage()</declaration>
                    </MClassMember>
