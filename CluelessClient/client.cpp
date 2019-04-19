@@ -64,8 +64,13 @@ Client::Client(QWidget *parent)
     buttonBox->addButton(sendMessageButton, QDialogButtonBox::ActionRole);
     buttonBox->addButton(quitButton, QDialogButtonBox::RejectRole);
 
+    // Need to track what radio buttons are enabled and where the player's icon is
+    // When make guess is selected, that information is sent to the server in a coded form
+    // Need to decide how to encode data packets
+
     auto charBox = new QGroupBox(tr("Characters"));
     QGridLayout *charLayout = new QGridLayout;
+    // when we get a "card" emit a signal that disables the respective button
     QRadioButton *radioA = new QRadioButton(tr("A"));
     QRadioButton *radioB = new QRadioButton(tr("B"));
     QRadioButton *radioC = new QRadioButton(tr("C"));
@@ -82,6 +87,7 @@ Client::Client(QWidget *parent)
 
     auto weapBox = new QGroupBox(tr("Weapons"));
     QGridLayout *weapLayout = new QGridLayout;
+    // when we get a "card" emit a signal that disables the respective button
     QRadioButton *radioU = new QRadioButton(tr("U"));
     QRadioButton *radioV = new QRadioButton(tr("V"));
     QRadioButton *radioW = new QRadioButton(tr("W"));
