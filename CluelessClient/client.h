@@ -18,6 +18,14 @@ class Client : public QDialog
 
 public:
     explicit Client(QWidget *parent = nullptr);
+    void decodeMessage(qint64 newMes);
+    qint64 playerNumber;
+    qint64 t_playerNumber;
+    qint64 t_GA;
+    qint64 t_character;
+    qint64 t_weapon;
+    qint64 t_row;
+    qint64 t_col;
 
 
 private slots:

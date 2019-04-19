@@ -20,6 +20,7 @@ class Server : public QDialog
 public:
     explicit Server(QWidget *parent = nullptr);
     CardDictionary *cardDict = new CardDictionary();
+    qint64 encodeMessage(qint64 m_player, qint64 m_gA, qint64 m_char, qint64 m_loc, qint64 m_weap, qint64 m_col);
 
 private slots:
     void sessionOpened();

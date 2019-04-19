@@ -81,6 +81,18 @@ Server::Server(QWidget *parent)
     setWindowTitle(QGuiApplication::applicationDisplayName());
 }
 
+qint64 Server::encodeMessage(qint64 m_player, qint64 m_ga, qint64 m_char, qint64 m_weap, qint64 m_row, qint64 m_col)
+{
+    qint64 m_mes = 0;
+    m_mes = m_mes | m_player;
+    m_mes = (m_mes << 4) | m_ga;
+    m_mes = (m_mes << 4) | m_char;
+    m_mes = (m_mes << 4) | m_weap;
+    m_mes = (m_mes << 4) | m_row;
+    m_mes = (m_mes << 4) | m_col;
+    return m_mes;
+}
+
 void Server::sessionOpened()
 {
     // Save the used configuration
@@ -139,7 +151,7 @@ void Server::addPlayer()
         gameStatusLabel->setText(tr("%1 players have joined.\n").arg(playerList.length()));
 
         QString gameState = QString("Welcome Player%1").arg(playerList.length());
-        qint64 message = 2000;
+        qint64 message = encodeMessage(0,2,5,5,4,2);
         //out << gameState;
         out << message;
         clientConnection->write(block);

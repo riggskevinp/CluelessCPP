@@ -195,6 +195,16 @@ Client::Client(QWidget *parent)
     }
 }
 
+void Client::decodeMessage(qint64 newMes)
+{
+    t_col = newMes & 0xF;
+    t_row = (newMes >> 4) & 0xF;
+    t_weapon = (newMes >> 8) & 0xF;
+    t_character = (newMes >> 12) & 0xF;
+    t_GA = (newMes >> 16) & 0xF;
+    t_playerNumber = (newMes >> 20) & 0xF;
+}
+
 void Client::enableJoinGameButton()
 {
     joinGameButton->setEnabled((!networkSession || networkSession->isOpen()) &&
@@ -285,10 +295,13 @@ void Client::receiveMessage()
 
     qint64 newMessage;
     in >> newMessage;
+    decodeMessage(newMessage);
+
+
 
     //if (!in.commitTransaction()) // potential for error checking
     //    return;
 
-    statusLabel->setText(tr("%1").arg(newMessage));
+    statusLabel->setText(tr("Player%1 GA%2 Char%3 Weap%4 Row%5 Col%6").arg(t_playerNumber).arg(t_GA).arg(t_character).arg(t_weapon).arg(t_row).arg(t_col));
     sendMessageButton->setEnabled(true);
 }
