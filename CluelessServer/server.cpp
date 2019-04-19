@@ -166,17 +166,21 @@ void Server::sendMessage()
 void Server::receiveMessage()
 {
     in.setDevice(playerList[0]->getSocket());
-    in.setVersion(QDataStream::Qt_4_0);
+    in.setVersion(QDataStream::Qt_5_10);
     in.startTransaction();
 
     QString newMessage;
     in >> newMessage;
+
+    //qint64 newMessage;
+    //in >> newMessage;
 
     //if (!in.commitTransaction()){ // potential for error checking
     //    gameStatusLabel-setText("Empty message");
     //    return;
     //}
     gameStatusLabel->setText(newMessage);
+    //gameStatusLabel->setText(tr("%i").arg(newMessge));
     sendMessageButton->setEnabled(true);
 }
 

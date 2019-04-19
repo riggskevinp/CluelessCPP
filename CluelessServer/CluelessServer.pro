@@ -15,7 +15,7 @@ SOURCES += \
         main.cpp \
     server.cpp \
     player.cpp \
-    PlayerKnowledge.cpp
+    CardDictionary.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -28,7 +28,6 @@ DISTFILES += \
 HEADERS += \
     server.h \
     player.h \
-    PlayerKnowledge.h \
-    cards.h
+    CardDictionary.h
 
 
