@@ -1,5 +1,6 @@
 #include <QtWidgets>
 #include <QtNetwork>
+#include <QGroupBox>
 
 #include "client.h"
 
@@ -63,6 +64,70 @@ Client::Client(QWidget *parent)
     buttonBox->addButton(sendMessageButton, QDialogButtonBox::ActionRole);
     buttonBox->addButton(quitButton, QDialogButtonBox::RejectRole);
 
+    auto charBox = new QGroupBox(tr("Characters"));
+    QGridLayout *charLayout = new QGridLayout;
+    QRadioButton *radioA = new QRadioButton(tr("A"));
+    QRadioButton *radioB = new QRadioButton(tr("B"));
+    QRadioButton *radioC = new QRadioButton(tr("C"));
+    QRadioButton *radioD = new QRadioButton(tr("D"));
+    QRadioButton *radioE = new QRadioButton(tr("E"));
+    QRadioButton *radioF = new QRadioButton(tr("F"));
+    charLayout->addWidget(radioA);
+    charLayout->addWidget(radioB);
+    charLayout->addWidget(radioC);
+    charLayout->addWidget(radioD);
+    charLayout->addWidget(radioE);
+    charLayout->addWidget(radioF);
+    charBox->setLayout(charLayout);
+
+    auto weapBox = new QGroupBox(tr("Weapons"));
+    QGridLayout *weapLayout = new QGridLayout;
+    QRadioButton *radioU = new QRadioButton(tr("U"));
+    QRadioButton *radioV = new QRadioButton(tr("V"));
+    QRadioButton *radioW = new QRadioButton(tr("W"));
+    QRadioButton *radioX = new QRadioButton(tr("X"));
+    QRadioButton *radioY = new QRadioButton(tr("Y"));
+    QRadioButton *radioZ = new QRadioButton(tr("Z"));
+    weapLayout->addWidget(radioU);
+    weapLayout->addWidget(radioV);
+    weapLayout->addWidget(radioW);
+    weapLayout->addWidget(radioX);
+    weapLayout->addWidget(radioY);
+    weapLayout->addWidget(radioZ);
+    weapBox->setLayout(weapLayout);
+
+    QTableWidget *gameBoard = new QTableWidget;
+    gameBoard->setRowCount(5);
+    gameBoard->setColumnCount(5);
+    gameBoard->verticalHeader()->setVisible(false);
+    gameBoard->horizontalHeader()->setVisible(false);
+    gameBoard->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+    gameBoard->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    gameBoard->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    //gameBoard->resizeColumnsToContents();
+
+
+
+    auto makeGuessButton = new QPushButton(tr("Make Guess"));
+
+    auto charWeapBox = new QGroupBox;
+    QVBoxLayout *charWeapLayout = new QVBoxLayout;
+    charWeapLayout->addWidget(charBox);
+    charWeapLayout->addWidget(weapBox);
+    charWeapLayout->addWidget(makeGuessButton);
+
+    charWeapBox->setLayout(charWeapLayout);
+
+    auto guessBox = new QGroupBox(tr("Guess"));
+    QHBoxLayout *guessLayout = new QHBoxLayout;
+    // add make guess button to layout; later move to larger layout
+    guessLayout->addWidget(charWeapBox);
+    guessLayout->addWidget(gameBoard);
+    guessBox->setLayout(guessLayout);
+
+
+
+
     in.setDevice(tcpSocket);
     in.setVersion(QDataStream::Qt_4_0);
 
@@ -75,26 +140,27 @@ Client::Client(QWidget *parent)
     connect(tcpSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &Client::displayError);
 
     QGridLayout *mainLayout = nullptr;
-    if (QGuiApplication::styleHints()->showIsFullScreen() || QGuiApplication::styleHints()->showIsMaximized()) {
-        auto outerVerticalLayout = new QVBoxLayout(this);
-        outerVerticalLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::Ignored, QSizePolicy::MinimumExpanding));
-        auto outerHorizontalLayout = new QHBoxLayout;
-        outerHorizontalLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::MinimumExpanding, QSizePolicy::Ignored));
-        auto groupBox = new QGroupBox(QGuiApplication::applicationDisplayName());
-        mainLayout = new QGridLayout(groupBox);
-        outerHorizontalLayout->addWidget(groupBox);
-        outerHorizontalLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::MinimumExpanding, QSizePolicy::Ignored));
-        outerVerticalLayout->addLayout(outerHorizontalLayout);
-        outerVerticalLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::Ignored, QSizePolicy::MinimumExpanding));
-    } else {
+    //if (QGuiApplication::styleHints()->showIsFullScreen() || QGuiApplication::styleHints()->showIsMaximized()) {
+    //    auto outerVerticalLayout = new QVBoxLayout(this);
+    //    outerVerticalLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::Ignored, QSizePolicy::MinimumExpanding));
+    //    auto outerHorizontalLayout = new QHBoxLayout;
+    //    outerHorizontalLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::MinimumExpanding, QSizePolicy::Ignored));
+    //    auto groupBox = new QGroupBox(QGuiApplication::applicationDisplayName());
+    //    mainLayout = new QGridLayout(groupBox);
+    //    outerHorizontalLayout->addWidget(groupBox);
+    //    outerHorizontalLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::MinimumExpanding, QSizePolicy::Ignored));
+    //    outerVerticalLayout->addLayout(outerHorizontalLayout);
+    //    outerVerticalLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::Ignored, QSizePolicy::MinimumExpanding));
+    //} else {
         mainLayout = new QGridLayout(this);
-    }
+    //}
     mainLayout->addWidget(hostLabel, 0, 0);
     mainLayout->addWidget(hostCombo, 0, 1);
     mainLayout->addWidget(portLabel, 1, 0);
     mainLayout->addWidget(portLineEdit, 1, 1);
     mainLayout->addWidget(statusLabel, 2, 0, 1, 2);
     mainLayout->addWidget(buttonBox, 3, 0, 1, 2);
+    mainLayout->addWidget(guessBox, 4, 0, 20, 100);
 
     setWindowTitle(QGuiApplication::applicationDisplayName());
     portLineEdit->setFocus();
