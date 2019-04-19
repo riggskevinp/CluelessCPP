@@ -14,7 +14,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
     server.cpp \
-    player.cpp
+    player.cpp \
+    PlayerKnowledge.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -26,6 +27,8 @@ DISTFILES += \
 
 HEADERS += \
     server.h \
-    player.h
+    player.h \
+    PlayerKnowledge.h \
+    cards.h
 
 
