@@ -7,6 +7,7 @@
 #include <QtNetwork>
 
 #include "player.h"
+#include "CardDictionary.h"
 
 class QLabel;
 class QTcpServer;
@@ -18,6 +19,7 @@ class Server : public QDialog
     Q_OBJECT
 public:
     explicit Server(QWidget *parent = nullptr);
+    CardDictionary *cardDict = new CardDictionary();
 
 private slots:
     void sessionOpened();

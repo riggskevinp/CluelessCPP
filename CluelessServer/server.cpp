@@ -6,7 +6,9 @@
 
 Server::Server(QWidget *parent)
     : QDialog (parent)
-    , statusLabel(new QLabel), gameStatusLabel(new QLabel), sendMessageButton(new QPushButton(tr("Send Message")))
+    , statusLabel(new QLabel)
+    , gameStatusLabel(new QLabel)
+    , sendMessageButton(new QPushButton(tr("Send Message")))
 {
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
     statusLabel->setTextInteractionFlags(Qt::TextBrowserInteraction);
@@ -137,7 +139,9 @@ void Server::addPlayer()
         gameStatusLabel->setText(tr("%1 players have joined.\n").arg(playerList.length()));
 
         QString gameState = QString("Welcome Player%1").arg(playerList.length());
-        out << gameState;
+        qint64 message = 2000;
+        //out << gameState;
+        out << message;
         clientConnection->write(block);
         sendMessageButton->setEnabled(true);
         connect(clientConnection, &QIODevice::readyRead, this, &Server::receiveMessage);
@@ -151,8 +155,13 @@ void Server::sendMessage()
     QDataStream out(&block, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_5_10);
 
+    qint64 message = 2555;
+    out << message;
+
     //gameState << QString("Game Starting");
-    out << QString("Game Started");
+    //out << QString("Game Started");
+
+
 
     playerList[0]->getSocket()->write(block);
     sendMessageButton->setEnabled(false);
@@ -171,6 +180,7 @@ void Server::receiveMessage()
 
     QString newMessage;
     in >> newMessage;
+
 
     //qint64 newMessage;
     //in >> newMessage;

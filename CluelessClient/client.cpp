@@ -279,13 +279,16 @@ void Client::receiveMessage()
 {
     in.startTransaction();
 
-    QString newMessage;
-    in >> newMessage;
+    //QString newMessage;
+    //in >> newMessage;
     //newMessage.append("Message received");
+
+    qint64 newMessage;
+    in >> newMessage;
 
     //if (!in.commitTransaction()) // potential for error checking
     //    return;
 
-    statusLabel->setText(newMessage);
+    statusLabel->setText(tr("%1").arg(newMessage));
     sendMessageButton->setEnabled(true);
 }

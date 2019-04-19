@@ -2,6 +2,10 @@
 
 CardDictionary::CardDictionary()
 {
+    this->CharacterMap = new QMap<qint64, QString>;
+    this->LocationMap = new QMap<qint64, QString>;
+    this->WeaponMap = new QMap<qint64, QString>;
+
     CharacterMap->insert(0, "player1");
     CharacterMap->insert(1, "player2");
     CharacterMap->insert(2, "player3");
@@ -9,7 +13,7 @@ CardDictionary::CardDictionary()
     CharacterMap->insert(4, "player5");
     CharacterMap->insert(5, "player6");
 
-    LocationMap->insert(0, "study");
+    LocationMap->insert(55, "study");
     LocationMap->insert(1, "hallway1");
     LocationMap->insert(2, "hall");
     LocationMap->insert(3, "hallway2");
@@ -36,7 +40,7 @@ CardDictionary::CardDictionary()
     LocationMap->insert(44, "kitchen");
 
 
-    WeaponMap->insert(0, "rope");
+    WeaponMap->insert(6, "rope");
     WeaponMap->insert(1, "pipe");
     WeaponMap->insert(2, "knife");
     WeaponMap->insert(3, "wrench");
