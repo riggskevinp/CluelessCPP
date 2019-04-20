@@ -93,6 +93,34 @@ qint64 Server::encodeMessage(qint64 m_player, qint64 m_ga, qint64 m_char, qint64
     return m_mes;
 }
 
+void Server::decodeMessage(qint64 newMes)
+{
+    t_col = newMes & 0xF;
+    t_row = (newMes >> 4) & 0xF;
+    t_weapon = (newMes >> 8) & 0xF;
+    t_character = (newMes >> 12) & 0xF;
+    t_GA = (newMes >> 16) & 0xF;
+    t_playerNumber = (newMes >> 20) & 0xF;
+}
+
+void Server::answer(qint64 m_message)
+{
+    QByteArray block;
+    QDataStream out(&block, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_5_10);
+
+    out << m_message;
+
+    //gameState << QString("Game Starting");
+    //out << QString("Game Started");
+
+
+
+    playerList[t_playerNumber]->getSocket()->write(block);
+    sendMessageButton->setEnabled(false);
+}
+
+
 void Server::sessionOpened()
 {
     // Save the used configuration
@@ -140,7 +168,7 @@ void Server::sessionOpened()
 
 void Server::addPlayer()
 {
-    if(playerList.length() < 3){
+    if(playerList.length() < 6){
         QTcpSocket *clientConnection = tcpServer->nextPendingConnection();
         playerList.append(new Player(clientConnection));
 
@@ -148,10 +176,25 @@ void Server::addPlayer()
         QDataStream out(&block, QIODevice::WriteOnly);
         out.setVersion(QDataStream::Qt_5_10);
 
-        gameStatusLabel->setText(tr("%1 players have joined.\n").arg(playerList.length()));
+        qint64 playerListLength = playerList.length();
 
-        QString gameState = QString("Welcome Player%1").arg(playerList.length());
-        qint64 message = encodeMessage(0,2,5,5,4,2);
+        gameStatusLabel->setText(tr("%1 players have joined.\n").arg(playerListLength));
+
+        QString gameState = QString("Welcome Player%1").arg(playerListLength);
+        qint64 message = 0;
+        if(playerListLength == 1){
+            message = encodeMessage(playerListLength - 1,2,6,6,5,5);
+        } else if (playerListLength == 2) {
+            message = encodeMessage(playerListLength - 1,2,6,6,5,5);
+        } else if (playerListLength == 3) {
+            message = encodeMessage(playerListLength - 1,2,6,6,5,5);
+        } else if (playerListLength == 4) {
+            message = encodeMessage(playerListLength - 1,2,6,6,5,5);
+        } else if (playerListLength == 5) {
+            message = encodeMessage(playerListLength - 1,2,6,6,5,5);
+        } else if (playerListLength == 6) {
+            message = encodeMessage(playerListLength - 1,2,6,6,5,5);
+        }
         //out << gameState;
         out << message;
         clientConnection->write(block);
@@ -167,7 +210,7 @@ void Server::sendMessage()
     QDataStream out(&block, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_5_10);
 
-    qint64 message = 2555;
+    qint64 message = encodeMessage(playerTurn,2,5,5,4,2);
     out << message;
 
     //gameState << QString("Game Starting");
@@ -175,8 +218,35 @@ void Server::sendMessage()
 
 
 
-    playerList[0]->getSocket()->write(block);
+    playerList[playerTurn]->getSocket()->write(block);
     sendMessageButton->setEnabled(false);
+
+    //while(i < playerList.length()){
+    //    playerList[i]->write(block);
+    //    i++;
+    //}
+}
+
+void Server::notifyAll()
+{
+    QByteArray block;
+    QDataStream out(&block, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_5_10);
+
+    qint64 message = encodeMessage(t_playerNumber,t_GA,t_character,t_weapon,t_row,t_col);
+    out << message;
+
+    //gameState << QString("Game Starting");
+    //out << QString("Game Started");
+    for(int i = 0; i < playerList.length(); i++){
+        if(t_playerNumber == i){
+
+        } else {
+            playerList[i]->getSocket()->write(block);
+        }
+    }
+    //playerList[player]->getSocket()->write(block);
+    //sendMessageButton->setEnabled(false);
 
     //while(i < playerList.length()){
     //    playerList[i]->write(block);
@@ -190,9 +260,17 @@ void Server::receiveMessage()
     in.setVersion(QDataStream::Qt_5_10);
     in.startTransaction();
 
-    QString newMessage;
+    qint64 newMessage;
     in >> newMessage;
+    decodeMessage(newMessage);
 
+    if(t_character != solCharacter){
+        // tell playerTurn the character was wrong
+        // notify all other players of guess
+        // set playerTurn to next player
+        //notifyAll();
+        answer(encodeMessage(t_playerNumber,2,t_character,6,5,5));
+    }
 
     //qint64 newMessage;
     //in >> newMessage;
@@ -201,8 +279,10 @@ void Server::receiveMessage()
     //    gameStatusLabel-setText("Empty message");
     //    return;
     //}
-    gameStatusLabel->setText(newMessage);
-    //gameStatusLabel->setText(tr("%i").arg(newMessge));
+
+    // Todo turn gameStatusLabel into a scrolling log of all updates
+    //gameStatusLabel->setText(newMessage);
+    gameStatusLabel->setText(tr("Player%1  GA%2  Character%3  Weapon%4  Row%5 Col%6").arg(t_playerNumber).arg(t_GA).arg(t_character).arg(t_weapon).arg(t_row).arg(t_col));
     sendMessageButton->setEnabled(true);
 }
 

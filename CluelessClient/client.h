@@ -19,13 +19,14 @@ class Client : public QDialog
 public:
     explicit Client(QWidget *parent = nullptr);
     void decodeMessage(qint64 newMes);
-    qint64 playerNumber;
-    qint64 t_playerNumber;
-    qint64 t_GA;
-    qint64 t_character;
-    qint64 t_weapon;
-    qint64 t_row;
-    qint64 t_col;
+    qint64 encodeMessage(qint64 m_player, qint64 m_ga, qint64 m_char, qint64 m_weap, qint64 m_row, qint64 m_col);
+    qint64 playerNumber = 0;
+    qint64 i_playerNumber = 0;
+    qint64 i_GA = 0;
+    qint64 i_character = 0;
+    qint64 i_weapon = 0;
+    qint64 i_row = 0;
+    qint64 i_col = 0;
 
 
 private slots:
@@ -36,6 +37,19 @@ private slots:
     void sessionOpened();
     void sendMessage(); // be able to click sendMessage after being notified by server
     void receiveMessage();
+    void makeGuess();
+    void redSelected(){i_character = 0;}
+    void yellowSelected(){i_character = 1;}
+    void whiteSelected(){i_character = 2;}
+    void greenSelected(){i_character = 3;}
+    void blueSelected(){i_character = 4;}
+    void purpleSelected(){i_character = 5;}
+    void ropeSelected(){i_weapon = 0;}
+    void pipeSelected(){i_weapon = 1;}
+    void knifeSelected(){i_weapon = 2;}
+    void wrenchSelected(){i_weapon = 3;}
+    void candlestickSelected(){i_weapon = 4;}
+    void revolverSelected(){i_weapon = 5;}
 
 private:
     QComboBox *hostCombo = nullptr;

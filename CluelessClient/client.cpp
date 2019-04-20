@@ -71,35 +71,47 @@ Client::Client(QWidget *parent)
     auto charBox = new QGroupBox(tr("Characters"));
     QGridLayout *charLayout = new QGridLayout;
     // when we get a "card" emit a signal that disables the respective button
-    QRadioButton *radioA = new QRadioButton(tr("A"));
-    QRadioButton *radioB = new QRadioButton(tr("B"));
-    QRadioButton *radioC = new QRadioButton(tr("C"));
-    QRadioButton *radioD = new QRadioButton(tr("D"));
-    QRadioButton *radioE = new QRadioButton(tr("E"));
-    QRadioButton *radioF = new QRadioButton(tr("F"));
-    charLayout->addWidget(radioA);
-    charLayout->addWidget(radioB);
-    charLayout->addWidget(radioC);
-    charLayout->addWidget(radioD);
-    charLayout->addWidget(radioE);
-    charLayout->addWidget(radioF);
+    QRadioButton *radioRed = new QRadioButton(tr("Red"));
+    connect(radioRed, &QAbstractButton::clicked, this, &Client::redSelected);
+    QRadioButton *radioYellow = new QRadioButton(tr("Yellow"));
+    connect(radioYellow, &QAbstractButton::clicked, this, &Client::yellowSelected);
+    QRadioButton *radioWhite = new QRadioButton(tr("White"));
+    connect(radioWhite, &QAbstractButton::clicked, this, &Client::whiteSelected);
+    QRadioButton *radioGreen = new QRadioButton(tr("Green"));
+    connect(radioGreen, &QAbstractButton::clicked, this, &Client::greenSelected);
+    QRadioButton *radioBlue = new QRadioButton(tr("Blue"));
+    connect(radioBlue, &QAbstractButton::clicked, this, &Client::blueSelected);
+    QRadioButton *radioPurple = new QRadioButton(tr("Purple"));
+    connect(radioPurple, &QAbstractButton::clicked, this, &Client::purpleSelected);
+    charLayout->addWidget(radioRed);
+    charLayout->addWidget(radioYellow);
+    charLayout->addWidget(radioWhite);
+    charLayout->addWidget(radioGreen);
+    charLayout->addWidget(radioBlue);
+    charLayout->addWidget(radioPurple);
     charBox->setLayout(charLayout);
 
     auto weapBox = new QGroupBox(tr("Weapons"));
     QGridLayout *weapLayout = new QGridLayout;
     // when we get a "card" emit a signal that disables the respective button
-    QRadioButton *radioU = new QRadioButton(tr("U"));
-    QRadioButton *radioV = new QRadioButton(tr("V"));
-    QRadioButton *radioW = new QRadioButton(tr("W"));
-    QRadioButton *radioX = new QRadioButton(tr("X"));
-    QRadioButton *radioY = new QRadioButton(tr("Y"));
-    QRadioButton *radioZ = new QRadioButton(tr("Z"));
-    weapLayout->addWidget(radioU);
-    weapLayout->addWidget(radioV);
-    weapLayout->addWidget(radioW);
-    weapLayout->addWidget(radioX);
-    weapLayout->addWidget(radioY);
-    weapLayout->addWidget(radioZ);
+    QRadioButton *radioRope = new QRadioButton(tr("Rope"));
+    connect(radioRope, &QAbstractButton::clicked, this, &Client::ropeSelected);
+    QRadioButton *radioPipe = new QRadioButton(tr("Pipe"));
+    connect(radioPipe, &QAbstractButton::clicked, this, &Client::pipeSelected);
+    QRadioButton *radioKnife = new QRadioButton(tr("Knife"));
+    connect(radioKnife, &QAbstractButton::clicked, this, &Client::knifeSelected);
+    QRadioButton *radioWrench = new QRadioButton(tr("Wrench"));
+    connect(radioWrench, &QAbstractButton::clicked, this, &Client::wrenchSelected);
+    QRadioButton *radioCandlestick = new QRadioButton(tr("Candlestick"));
+    connect(radioCandlestick, &QAbstractButton::clicked, this, &Client::candlestickSelected);
+    QRadioButton *radioRevolver = new QRadioButton(tr("Revolver"));
+    connect(radioRevolver, &QAbstractButton::clicked, this, &Client::revolverSelected);
+    weapLayout->addWidget(radioRope);
+    weapLayout->addWidget(radioPipe);
+    weapLayout->addWidget(radioKnife);
+    weapLayout->addWidget(radioWrench);
+    weapLayout->addWidget(radioCandlestick);
+    weapLayout->addWidget(radioRevolver);
     weapBox->setLayout(weapLayout);
 
     QTableWidget *gameBoard = new QTableWidget;
@@ -115,6 +127,7 @@ Client::Client(QWidget *parent)
 
 
     auto makeGuessButton = new QPushButton(tr("Make Guess"));
+    connect(makeGuessButton, &QAbstractButton::clicked, this, &Client::makeGuess);
 
     auto charWeapBox = new QGroupBox;
     QVBoxLayout *charWeapLayout = new QVBoxLayout;
@@ -197,12 +210,24 @@ Client::Client(QWidget *parent)
 
 void Client::decodeMessage(qint64 newMes)
 {
-    t_col = newMes & 0xF;
-    t_row = (newMes >> 4) & 0xF;
-    t_weapon = (newMes >> 8) & 0xF;
-    t_character = (newMes >> 12) & 0xF;
-    t_GA = (newMes >> 16) & 0xF;
-    t_playerNumber = (newMes >> 20) & 0xF;
+    i_col = newMes & 0xF;
+    i_row = (newMes >> 4) & 0xF;
+    i_weapon = (newMes >> 8) & 0xF;
+    i_character = (newMes >> 12) & 0xF;
+    i_GA = (newMes >> 16) & 0xF;
+    i_playerNumber = (newMes >> 20) & 0xF;
+}
+
+qint64 Client::encodeMessage(qint64 m_player, qint64 m_ga, qint64 m_char, qint64 m_weap, qint64 m_row, qint64 m_col)
+{
+    qint64 m_mes = 0;
+    m_mes = m_mes | m_player;
+    m_mes = (m_mes << 4) | m_ga;
+    m_mes = (m_mes << 4) | m_char;
+    m_mes = (m_mes << 4) | m_weap;
+    m_mes = (m_mes << 4) | m_row;
+    m_mes = (m_mes << 4) | m_col;
+    return m_mes;
 }
 
 void Client::enableJoinGameButton()
@@ -246,8 +271,13 @@ void Client::sendMessage()
     QDataStream out(&block, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_5_10);
 
-    QString gameState = QString("Message from Player");
-    out << gameState;
+    //QString gameState = QString("Message from Player");
+    //out << gameState;
+
+    qint64 message = encodeMessage(i_playerNumber,i_GA,i_character,i_weapon,i_row,i_col);
+    //qint64 message = encodeMessage(2,2,2,2,2,2);
+    out << message;
+
     tcpSocket->write(block);
     sendMessageButton->setEnabled(false);
 }
@@ -302,6 +332,22 @@ void Client::receiveMessage()
     //if (!in.commitTransaction()) // potential for error checking
     //    return;
 
-    statusLabel->setText(tr("Player%1 GA%2 Char%3 Weap%4 Row%5 Col%6").arg(t_playerNumber).arg(t_GA).arg(t_character).arg(t_weapon).arg(t_row).arg(t_col));
+    statusLabel->setText(tr("Player%1 GA%2 Char%3 Weap%4 Row%5 Col%6").arg(i_playerNumber).arg(i_GA).arg(i_character).arg(i_weapon).arg(i_row).arg(i_col));
     sendMessageButton->setEnabled(true);
+}
+
+void Client::makeGuess()
+{
+    QByteArray block;
+    QDataStream out(&block, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_5_10);
+
+    //Determine which Character
+    //Determine which Weapon
+    //Determine location
+
+    qint64 message = encodeMessage(playerNumber,/* i_GA */ 0,i_character,i_weapon,i_row,i_col);
+    out << message;
+
+    tcpSocket->write(block);
 }

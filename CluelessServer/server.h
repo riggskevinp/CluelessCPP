@@ -7,7 +7,6 @@
 #include <QtNetwork>
 
 #include "player.h"
-#include "CardDictionary.h"
 
 class QLabel;
 class QTcpServer;
@@ -19,8 +18,20 @@ class Server : public QDialog
     Q_OBJECT
 public:
     explicit Server(QWidget *parent = nullptr);
-    CardDictionary *cardDict = new CardDictionary();
     qint64 encodeMessage(qint64 m_player, qint64 m_gA, qint64 m_char, qint64 m_loc, qint64 m_weap, qint64 m_col);
+    void decodeMessage(qint64 newMes);
+    void answer(qint64 m_message);
+    qint64 playerTurn = 0;
+    qint64 t_playerNumber;
+    qint64 t_GA;
+    qint64 t_character;
+    qint64 t_weapon;
+    qint64 t_row;
+    qint64 t_col;
+    qint64 solCharacter = 2;
+    qint64 solWeapon = 3;
+    qint64 solRow = 4;
+    qint64 solCol = 2;
 
 private slots:
     void sessionOpened();
@@ -36,6 +47,7 @@ private:
     QNetworkSession *networkSession = nullptr;
     QDataStream in;
     QPushButton *sendMessageButton = nullptr;
+    void notifyAll();
 
 };
 
