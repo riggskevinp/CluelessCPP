@@ -10,8 +10,18 @@ Server::Server(QWidget *parent)
     , gameStatusLabel(new QLabel)
     , sendMessageButton(new QPushButton(tr("Send Message")))
 {
+    /*
+     * Constructor for the server
+     * This has the UI elements and sets up the actual 'server' portion
+     *
+     * Tough to document how the UI is set up, I recommend reading carefully
+     * This is creating the UI entirely through code instead of using a UI form
+     */
+
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
     statusLabel->setTextInteractionFlags(Qt::TextBrowserInteraction);
+    // Potentiall replace gameStatusLabel with a scrolling textbox in order to handl logging
+    // We can dump the contents when the application closes
     gameStatusLabel->setTextInteractionFlags(Qt::TextBrowserInteraction);
 
     QNetworkConfigurationManager manager;
@@ -44,6 +54,8 @@ Server::Server(QWidget *parent)
     auto quitButton = new QPushButton(tr("Quit"));
     quitButton->setAutoDefault(false);
     connect(quitButton, &QAbstractButton::clicked, this, &QWidget::close);
+    // Signal and slot example, we connect the signal newConnection that is emitted by tcpServer and connect it to the slot addPlayer
+    // Thus for each new connection, addPlayer gets run.
     connect(tcpServer, &QTcpServer::newConnection, this, &Server::addPlayer);
     //connect(playerList[0]->getSocket(), &QIODevice::readyRead, this, &Server::receiveMessage);
 
@@ -83,6 +95,9 @@ Server::Server(QWidget *parent)
 
 qint64 Server::encodeMessage(qint64 m_player, qint64 m_ga, qint64 m_char, qint64 m_weap, qint64 m_row, qint64 m_col)
 {
+    /*
+     * Takes as inputs the integers that you want to send and encodes them into an integer to send
+     */
     qint64 m_mes = 0;
     m_mes = m_mes | m_player;
     m_mes = (m_mes << 4) | m_ga;
@@ -95,6 +110,11 @@ qint64 Server::encodeMessage(qint64 m_player, qint64 m_ga, qint64 m_char, qint64
 
 void Server::decodeMessage(qint64 newMes)
 {
+    /*
+     * This decodes incoming messages and sets the global variables to those values
+     *
+     * Not a very good solution but time is short
+     */
     t_col = newMes & 0xF;
     t_row = (newMes >> 4) & 0xF;
     t_weapon = (newMes >> 8) & 0xF;
@@ -105,17 +125,21 @@ void Server::decodeMessage(qint64 newMes)
 
 void Server::answer(qint64 m_message)
 {
+    /*
+     * Function whose intent is to respond to a client's guess with an answer
+     *
+     * Tell the client what it got wrong
+     *
+     * Need to decide how this message encoding will work
+     */
+
     QByteArray block;
     QDataStream out(&block, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_5_10);
 
     out << m_message;
 
-    //gameState << QString("Game Starting");
-    //out << QString("Game Started");
-
-
-
+    // need to determine who and how to access who to send the message to
     playerList[t_playerNumber]->getSocket()->write(block);
     sendMessageButton->setEnabled(false);
 }
@@ -123,6 +147,14 @@ void Server::answer(qint64 m_message)
 
 void Server::sessionOpened()
 {
+    /*
+     * This is taken from the Qt client server example
+     * When you start the server, it goes through possible ways to set itself up and then presents you with the result
+     * It has some error handling
+     *
+     * No modifications needed as far as I'm aware
+     */
+
     // Save the used configuration
     if (networkSession) {
         QNetworkConfiguration config = networkSession->configuration();
@@ -168,6 +200,13 @@ void Server::sessionOpened()
 
 void Server::addPlayer()
 {
+    /*
+     * This is a slot that when a client connects for the first time, it is added as a new player, and told which player it is
+     *
+     * This could probably also initialize the clients with their 'cards'
+     *
+     * Current logic limits players at 6, any new connections will be 'ignored' really just not handled
+     */
     if(playerList.length() < 6){
         QTcpSocket *clientConnection = tcpServer->nextPendingConnection();
         playerList.append(new Player(clientConnection));
@@ -195,7 +234,7 @@ void Server::addPlayer()
         } else if (playerListLength == 6) {
             message = encodeMessage(playerListLength - 1,2,6,6,5,5);
         }
-        //out << gameState;
+
         out << message;
         clientConnection->write(block);
         sendMessageButton->setEnabled(true);
@@ -206,6 +245,13 @@ void Server::addPlayer()
 
 void Server::sendMessage()
 {
+    /*
+     * Slot that has been used for testing sending messages
+     * This slot is connected to the SendMessage button
+     *
+     * Good for troublshooting
+     *
+     */
     QByteArray block;
     QDataStream out(&block, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_5_10);
@@ -213,22 +259,15 @@ void Server::sendMessage()
     qint64 message = encodeMessage(playerTurn,2,5,5,4,2);
     out << message;
 
-    //gameState << QString("Game Starting");
-    //out << QString("Game Started");
-
-
-
     playerList[playerTurn]->getSocket()->write(block);
     sendMessageButton->setEnabled(false);
-
-    //while(i < playerList.length()){
-    //    playerList[i]->write(block);
-    //    i++;
-    //}
 }
 
 void Server::notifyAll()
 {
+    /*
+     * Function for notifying the clients of the current clients move
+     * */
     QByteArray block;
     QDataStream out(&block, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_5_10);
@@ -236,8 +275,6 @@ void Server::notifyAll()
     qint64 message = encodeMessage(t_playerNumber,t_GA,t_character,t_weapon,t_row,t_col);
     out << message;
 
-    //gameState << QString("Game Starting");
-    //out << QString("Game Started");
     for(int i = 0; i < playerList.length(); i++){
         if(t_playerNumber == i){
 
@@ -245,18 +282,34 @@ void Server::notifyAll()
             playerList[i]->getSocket()->write(block);
         }
     }
-    //playerList[player]->getSocket()->write(block);
-    //sendMessageButton->setEnabled(false);
-
-    //while(i < playerList.length()){
-    //    playerList[i]->write(block);
-    //    i++;
-    //}
 }
 
 void Server::receiveMessage()
 {
-    in.setDevice(playerList[0]->getSocket());
+    /*
+     * !!!Problem with this!!!!!  Also See Server::answer() for continuation of the problem
+     *
+     * This is a slot that should be used for handling messages coming from clients
+     * We only want to listen to the client whose turn it is.  ie client == playerturn
+     *
+     * All other clients we want to ignore
+     *
+     * This slot is connected to each of the client connections readyread signals
+     *
+     * Currently this will never work as we are trying to ascertain who the message is coming from by using the message
+     * But we will only read the message if we know it is coming from the correct client
+     *
+     * Possible solution:
+     * We set in.setDevice(playerList[playerTurn]->getSocket()); This set the correct client that we listen to
+     * However, everytime a different client sends a message, we are going to read an empty message and send that to everyone
+     * I don't know what problems this might cause
+     *
+     * Possible solution: check to see if you can access the connection object that emitted the signal.
+     * This way you can test whether the clientconnection == playerList[playerturn]->getSocket()
+     *
+     * Doesn't solve this, but receive message might belong inside of the player class? Maybe?
+     */
+    in.setDevice(playerList[0]->getSocket()); //currently this is only listening to player[0], whenever
     in.setVersion(QDataStream::Qt_5_10);
     in.startTransaction();
 
@@ -271,14 +324,6 @@ void Server::receiveMessage()
         //notifyAll();
         answer(encodeMessage(t_playerNumber,2,t_character,6,5,5));
     }
-
-    //qint64 newMessage;
-    //in >> newMessage;
-
-    //if (!in.commitTransaction()){ // potential for error checking
-    //    gameStatusLabel-setText("Empty message");
-    //    return;
-    //}
 
     // Todo turn gameStatusLabel into a scrolling log of all updates
     //gameStatusLabel->setText(newMessage);
