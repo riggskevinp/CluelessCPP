@@ -66,8 +66,8 @@ Client::Client(QWidget *parent)
 
     // Need to track what radio buttons are enabled and where the player's icon is
     // When make guess is selected, that information is sent to the server in a coded form
-    // Need to decide how to encode data packets
 
+    // This is creating a groupbox with the character radio buttons
     auto charBox = new QGroupBox(tr("Characters"));
     QGridLayout *charLayout = new QGridLayout;
     // when we get a "card" emit a signal that disables the respective button
@@ -91,6 +91,7 @@ Client::Client(QWidget *parent)
     charLayout->addWidget(radioPurple);
     charBox->setLayout(charLayout);
 
+    // This is creating a groupbox with the weapon radio buttons
     auto weapBox = new QGroupBox(tr("Weapons"));
     QGridLayout *weapLayout = new QGridLayout;
     // when we get a "card" emit a signal that disables the respective button
@@ -114,6 +115,7 @@ Client::Client(QWidget *parent)
     weapLayout->addWidget(radioRevolver);
     weapBox->setLayout(weapLayout);
 
+    // this sets up the gameboard
     QTableWidget *gameBoard = new QTableWidget;
     gameBoard->setRowCount(5);
     gameBoard->setColumnCount(5);
@@ -124,11 +126,17 @@ Client::Client(QWidget *parent)
     gameBoard->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     //gameBoard->resizeColumnsToContents();
 
+    // !!! BIG TODO !!!
+    // We need to create roomobjects to populate the gameboard with
+    // See https://github.com/riggskevinp/CluelessCPP/issues/1
 
 
+    // create a Guess button and connect it to the makeGuess slot
     auto makeGuessButton = new QPushButton(tr("Make Guess"));
     connect(makeGuessButton, &QAbstractButton::clicked, this, &Client::makeGuess);
 
+    // A groupbox is created to hold both the character and weapon boxes
+    // It also holds the makeGuessButton
     auto charWeapBox = new QGroupBox;
     QVBoxLayout *charWeapLayout = new QVBoxLayout;
     charWeapLayout->addWidget(charBox);
@@ -139,17 +147,18 @@ Client::Client(QWidget *parent)
 
     auto guessBox = new QGroupBox(tr("Guess"));
     QHBoxLayout *guessLayout = new QHBoxLayout;
-    // add make guess button to layout; later move to larger layout
+    // Character Weapon box with make guess button added with gameBoard
     guessLayout->addWidget(charWeapBox);
     guessLayout->addWidget(gameBoard);
     guessBox->setLayout(guessLayout);
 
 
 
-
+    //we only connect to one server
     in.setDevice(tcpSocket);
     in.setVersion(QDataStream::Qt_4_0);
 
+    // See the connection of some signals and slots
     connect(hostCombo, &QComboBox::editTextChanged, this, &Client::enableJoinGameButton);
     connect(portLineEdit, &QLineEdit::textChanged, this, &Client::enableJoinGameButton);
     connect(joinGameButton, &QAbstractButton::clicked, this, &Client::joinGame);
@@ -158,6 +167,10 @@ Client::Client(QWidget *parent)
     connect(tcpSocket, &QIODevice::readyRead, this, &Client::receiveMessage);
     connect(tcpSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &Client::displayError);
 
+    // This is where the main layout is put together
+    //Commented out this if statement to see if it getting run, it isn't
+    //I think this was checking to see if it was maximized or fullscreen
+    //We may want to test this more, to see what happens when we maximize and resize with and without this statement
     QGridLayout *mainLayout = nullptr;
     //if (QGuiApplication::styleHints()->showIsFullScreen() || QGuiApplication::styleHints()->showIsMaximized()) {
     //    auto outerVerticalLayout = new QVBoxLayout(this);
@@ -210,6 +223,12 @@ Client::Client(QWidget *parent)
 
 void Client::decodeMessage(qint64 newMes)
 {
+    /*
+     * Takes an interger, ideally a properly formatted message
+     * and sets the global variables accordingly
+     *
+     * This is not the proper way to do this, but I don't think we have time to do it perfectly
+     */
     i_col = newMes & 0xF;
     i_row = (newMes >> 4) & 0xF;
     i_weapon = (newMes >> 8) & 0xF;
@@ -220,6 +239,9 @@ void Client::decodeMessage(qint64 newMes)
 
 qint64 Client::encodeMessage(qint64 m_player, qint64 m_ga, qint64 m_char, qint64 m_weap, qint64 m_row, qint64 m_col)
 {
+    /*
+     * Takes integers and encodes them in the format to send to the server
+     */
     qint64 m_mes = 0;
     m_mes = m_mes | m_player;
     m_mes = (m_mes << 4) | m_ga;
@@ -232,6 +254,8 @@ qint64 Client::encodeMessage(qint64 m_player, qint64 m_ga, qint64 m_char, qint64
 
 void Client::enableJoinGameButton()
 {
+    // Should probably just stay as is, makes sure the joingamebutton is enabled
+    // We can look closer at the logic to see if we can get rid of this, ie currently I think a client can connect to the server multiple times and the server will treat it as multiple players.
     joinGameButton->setEnabled((!networkSession || networkSession->isOpen()) &&
                                  !hostCombo->currentText().isEmpty() &&
                                  !portLineEdit->text().isEmpty());
@@ -240,12 +264,19 @@ void Client::enableJoinGameButton()
 
 void Client::enableSendMessageButton()
 {
+    //This can probably go away
+    //However, notice that yout can enable and disable buttons, this slot was necessary because the button is private
     sendMessageButton->setEnabled(true);
 
 }
 
 void Client::sessionOpened()
 {
+    /*
+     * From Qt client server example, we probably don't need to modify this
+     * This gets run when you start the application
+     */
+
     // Save the used configuration
     QNetworkConfiguration config = networkSession->configuration();
     QString id;
@@ -267,15 +298,21 @@ void Client::sessionOpened()
 
 void Client::sendMessage()
 {
+    /*
+     * This sends the current values of the global variables to the server as a message
+     *
+     * Can be useful for troubleshooting but we will probably want to take this away
+     * It is connected to the sendMessage button
+     *
+     * Make Guess and Make Accusation buttons remove the need for this
+     * Possibly refactor this into a Make Accusation - Also refactor send message button
+     * Make accusation might come later, might not make it into final release
+     */
     QByteArray block;
     QDataStream out(&block, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_5_10);
 
-    //QString gameState = QString("Message from Player");
-    //out << gameState;
-
     qint64 message = encodeMessage(i_playerNumber,i_GA,i_character,i_weapon,i_row,i_col);
-    //qint64 message = encodeMessage(2,2,2,2,2,2);
     out << message;
 
     tcpSocket->write(block);
@@ -284,6 +321,11 @@ void Client::sendMessage()
 
 void Client::displayError(QAbstractSocket::SocketError socketError)
 {
+    /*
+     * This comes from the Qt client server example
+     *
+     * This is error handling for when the client fails to connect to the host
+     */
     switch (socketError) {
     case QAbstractSocket::RemoteHostClosedError:
         break;
@@ -310,6 +352,10 @@ void Client::displayError(QAbstractSocket::SocketError socketError)
 
 void Client::joinGame()
 {
+    /*
+     * Connects the client to the host
+     * Probably doesn't need changes
+     */
     joinGameButton->setEnabled(false);
     tcpSocket->abort();
     tcpSocket->connectToHost(hostCombo->currentText(), portLineEdit->text().toInt());
@@ -317,20 +363,16 @@ void Client::joinGame()
 
 void Client::receiveMessage()
 {
+    /*
+     * This message takes a message, decodes it and sets the status label to the results
+     *
+     * We can turn the status label into a scrolling text box in order to log messages.
+     */
     in.startTransaction();
-
-    //QString newMessage;
-    //in >> newMessage;
-    //newMessage.append("Message received");
 
     qint64 newMessage;
     in >> newMessage;
     decodeMessage(newMessage);
-
-
-
-    //if (!in.commitTransaction()) // potential for error checking
-    //    return;
 
     statusLabel->setText(tr("Player%1 GA%2 Char%3 Weap%4 Row%5 Col%6").arg(i_playerNumber).arg(i_GA).arg(i_character).arg(i_weapon).arg(i_row).arg(i_col));
     sendMessageButton->setEnabled(true);
@@ -338,6 +380,11 @@ void Client::receiveMessage()
 
 void Client::makeGuess()
 {
+    /*
+     * This takes what the global variables are set to and sends that to the server
+     * This is connected to the guess button
+     */
+
     QByteArray block;
     QDataStream out(&block, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_5_10);
