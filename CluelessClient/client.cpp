@@ -3,6 +3,9 @@
 #include <QGroupBox>
 
 #include "client.h"
+#include <QTableWidgetItem>
+#include <QIcon>
+#include "dragwidget.h"
 
 Client::Client(QWidget *parent)
     : QDialog(parent)
@@ -124,6 +127,14 @@ Client::Client(QWidget *parent)
     gameBoard->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     gameBoard->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     gameBoard->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	gameBoard->setSelectionMode(QAbstractItemView::SingleSelection);
+	gameBoard->setDragDropMode(QAbstractItemView::InternalMove);
+	gameBoard->setItem(2,2, new QTableWidgetItem("Room Name"));
+	QTableWidgetItem *room = new QTableWidgetItem("Room Two");
+	QIcon testIcon =  QIcon(":/images/checkmark.png");
+	room->setIcon(testIcon);
+	gameBoard->setItem(4,4,room);
+
     //gameBoard->resizeColumnsToContents();
 
     // !!! BIG TODO !!!
