@@ -3,6 +3,9 @@
 #include <QGroupBox>
 
 #include "client.h"
+#include "datastore.h"
+#include "boardmodel.h"
+#include "room.h"
 
 Client::Client(QWidget *parent)
     : QDialog(parent)
@@ -129,7 +132,9 @@ Client::Client(QWidget *parent)
     // !!! BIG TODO !!!
     // We need to create roomobjects to populate the gameboard with
     // See https://github.com/riggskevinp/CluelessCPP/issues/1
-
+	DataStore* store = new DataStore();
+	QTableView* tableView = new QTableView;
+	tableView->setModel(new BoardModel(store));
 
     // create a Guess button and connect it to the makeGuess slot
     auto makeGuessButton = new QPushButton(tr("Make Guess"));
@@ -149,7 +154,8 @@ Client::Client(QWidget *parent)
     QHBoxLayout *guessLayout = new QHBoxLayout;
     // Character Weapon box with make guess button added with gameBoard
     guessLayout->addWidget(charWeapBox);
-    guessLayout->addWidget(gameBoard);
+    //guessLayout->addWidget(gameBoard);
+	guessLayout->addWidget(tableView);
     guessBox->setLayout(guessLayout);
 
 
