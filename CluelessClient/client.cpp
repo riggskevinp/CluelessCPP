@@ -137,8 +137,12 @@ Client::Client(QWidget *parent)
 	tableView->setModel(new BoardModel(store));
 
     // create a Guess button and connect it to the makeGuess slot
-    auto makeGuessButton = new QPushButton(tr("Make Guess"));
-    connect(makeGuessButton, &QAbstractButton::clicked, this, &Client::makeGuess);
+    auto makeSuggestButton = new QPushButton(tr("Suggest"));
+    connect(makeSuggestButton, &QAbstractButton::clicked, this, &Client::suggest);
+
+    // create a Accuse button and connect it to the accuse slot
+    auto makeAccuseButton = new QPushButton(tr("Accuse"));
+    connect(makeAccuseButton, &QAbstractButton::clicked, this, &Client::accuse);
 
     // A groupbox is created to hold both the character and weapon boxes
     // It also holds the makeGuessButton
@@ -146,7 +150,8 @@ Client::Client(QWidget *parent)
     QVBoxLayout *charWeapLayout = new QVBoxLayout;
     charWeapLayout->addWidget(charBox);
     charWeapLayout->addWidget(weapBox);
-    charWeapLayout->addWidget(makeGuessButton);
+    charWeapLayout->addWidget(makeSuggestButton);
+    charWeapLayout->addWidget(makeAccuseButton);
 
     charWeapBox->setLayout(charWeapLayout);
 
@@ -243,7 +248,7 @@ void Client::decodeMessage(qint64 newMes)
     i_playerNumber = (newMes >> 20) & 0xF;
 }
 
-qint64 Client::encodeMessage(qint64 m_player, qint64 m_ga, qint64 m_char, qint64 m_weap, qint64 m_row, qint64 m_col)
+qint64 Client::encodeMessage(qint64 m_player, qint64 m_ga, qint64 m_char, qint64 m_weap, qint64 m_row, qint64 m_col, bool isAccusation)
 {
     /*
      * Takes integers and encodes them in the format to send to the server
@@ -255,6 +260,7 @@ qint64 Client::encodeMessage(qint64 m_player, qint64 m_ga, qint64 m_char, qint64
     m_mes = (m_mes << 4) | m_weap;
     m_mes = (m_mes << 4) | m_row;
     m_mes = (m_mes << 4) | m_col;
+    m_mes = (m_mes << 4) | isAccusation;
     return m_mes;
 }
 
@@ -318,7 +324,7 @@ void Client::sendMessage()
     QDataStream out(&block, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_5_10);
 
-    qint64 message = encodeMessage(i_playerNumber,i_GA,i_character,i_weapon,i_row,i_col);
+    qint64 message = encodeMessage(i_playerNumber,i_GA,i_character,i_weapon,i_row,i_col, i_isAccusation);
     out << message;
 
     tcpSocket->write(block);
@@ -384,11 +390,11 @@ void Client::receiveMessage()
     sendMessageButton->setEnabled(true);
 }
 
-void Client::makeGuess()
+void Client::suggest()
 {
     /*
      * This takes what the global variables are set to and sends that to the server
-     * This is connected to the guess button
+     * This is connected to the suggest button
      */
 
     QByteArray block;
@@ -399,7 +405,27 @@ void Client::makeGuess()
     //Determine which Weapon
     //Determine location
 
-    qint64 message = encodeMessage(playerNumber,/* i_GA */ 0,i_character,i_weapon,i_row,i_col);
+    qint64 message = encodeMessage(playerNumber,/* i_GA */ 0,i_character,i_weapon,i_row,i_col, i_isAccusation);
+    out << message;
+
+    tcpSocket->write(block);
+}
+void Client::accuse()
+{
+    /*
+     * This takes what the global variables are set to and sends that to the server
+     * This is connected to the accuse button
+     */
+
+    QByteArray block;
+    QDataStream out(&block, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_5_10);
+
+    //Determine which Character
+    //Determine which Weapon
+    //Determine location
+
+    qint64 message = encodeMessage(playerNumber,/* i_GA */ 0,i_character,i_weapon,i_row,i_col, i_isAccusation);
     out << message;
 
     tcpSocket->write(block);
