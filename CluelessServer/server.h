@@ -5,6 +5,7 @@
 #include <QString>
 #include <QVector>
 #include <QtNetwork>
+#include <iostream>
 
 #include "player.h"
 
