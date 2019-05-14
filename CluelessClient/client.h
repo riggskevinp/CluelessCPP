@@ -29,6 +29,7 @@ public:
     qint64 i_col = 0;
 
 
+
 private slots:
     void enableJoinGameButton();
     void enableSendMessageButton();
@@ -37,7 +38,8 @@ private slots:
     void sessionOpened();
     void sendMessage(); // be able to click sendMessage after being notified by server
     void receiveMessage();
-    void makeGuess();
+    void suggest();
+    void accuse();
     void redSelected(){i_character = 0;}
     void yellowSelected(){i_character = 1;}
     void whiteSelected(){i_character = 2;}
