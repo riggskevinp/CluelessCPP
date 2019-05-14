@@ -1,6 +1,7 @@
 #include <QtWidgets>
 #include <QtNetwork>
 #include <QtCore>
+#include <iostream>
 
 #include "server.h"
 
@@ -20,7 +21,7 @@ Server::Server(QWidget *parent)
 
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
     statusLabel->setTextInteractionFlags(Qt::TextBrowserInteraction);
-    // Potentiall replace gameStatusLabel with a scrolling textbox in order to handl logging
+    // Potentially replace gameStatusLabel with a scrolling textbox in order to handl logging
     // We can dump the contents when the application closes
     gameStatusLabel->setTextInteractionFlags(Qt::TextBrowserInteraction);
 
@@ -121,6 +122,8 @@ void Server::decodeMessage(qint64 newMes)
     t_character = (newMes >> 12) & 0xF;
     t_GA = (newMes >> 16) & 0xF;
     t_playerNumber = (newMes >> 20) & 0xF;
+
+    std::cout << t_row << t_col << std::endl;
 }
 
 void Server::answer(qint64 m_message)
@@ -136,12 +139,13 @@ void Server::answer(qint64 m_message)
     QByteArray block;
     QDataStream out(&block, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_5_10);
-
     out << m_message;
 
     // need to determine who and how to access who to send the message to
     playerList[t_playerNumber]->getSocket()->write(block);
     sendMessageButton->setEnabled(false);
+
+
 }
 
 
@@ -258,7 +262,6 @@ void Server::sendMessage()
 
     qint64 message = encodeMessage(playerTurn,2,5,5,4,2);
     out << message;
-
     playerList[playerTurn]->getSocket()->write(block);
     sendMessageButton->setEnabled(false);
 }
@@ -322,7 +325,29 @@ void Server::receiveMessage()
         // notify all other players of guess
         // set playerTurn to next player
         //notifyAll();
-        answer(encodeMessage(t_playerNumber,2,t_character,6,5,5));
+        answer(encodeMessage(t_playerNumber,t_GA,t_character,t_weapon,t_row,t_col));
+        if (t_GA == 1){
+            //TODO - remove player from guessing list - they are out, but show them the answer
+        }
+    }
+
+   else if(t_weapon != solWeapon){
+        //check if player got correct weapon
+        answer(encodeMessage(t_playerNumber,t_GA,t_character,t_weapon,t_row,t_col));
+        if (t_GA == 1){
+            //TODO - remove player from guessing list - they are out, but show them the answer
+        }
+    }
+    else if (t_row == solRow || t_col == solCol){
+        //check players room guess
+        answer(encodeMessage(t_playerNumber,t_GA,t_character,t_weapon,t_row,t_col));
+        if (t_GA == 1){
+            //TODO - remove player from guessing list - they are out, but show them the answer
+        }
+    }
+    else {
+        // players answer is right. close game
+        std::cout << 'Congratulations, Player ' << t_playerNumber << 'wins.' << std::endl;
     }
 
     // Todo turn gameStatusLabel into a scrolling log of all updates
