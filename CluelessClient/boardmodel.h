@@ -12,6 +12,8 @@ class BoardModel : public QAbstractTableModel
 public:
 	explicit BoardModel(DataStore* store, QObject *parent = nullptr);
 	~BoardModel(){} // empty m_store
+	int playerNumber = 0; //switch to initializing this to 6?
+	void setPlayerNumber(int n_int);
 
 	// Header:
 
@@ -26,6 +28,8 @@ public:
 	Qt::ItemFlags flags(const QModelIndex &index) const override;
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
 	bool insertRows(int position, int rows, const QModelIndex &index = QModelIndex()) override;
+
+	void onDoubleClick(QModelIndex* index);
 
 private:
 	DataStore* m_store;

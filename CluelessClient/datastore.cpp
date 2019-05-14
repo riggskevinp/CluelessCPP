@@ -68,12 +68,14 @@ DataStore::DataStore()
 	row = 0;
 	col = 3;
 	Room* path03 = new Room(name,row,col,player0,player1,player2,player3,player4,player5);
+	path03->setPlayer0(true);
 	AddRoom(path03);
 
 	name = "path10";
 	row = 1;
 	col = 0;
 	Room* path10 = new Room(name,row,col,player0,player1,player2,player3,player4,player5);
+	path10->setPlayer5(true);
 	AddRoom(path10);
 
 	name = "path12";
@@ -86,6 +88,7 @@ DataStore::DataStore()
 	row = 1;
 	col = 4;
 	Room* path14 = new Room(name,row,col,player0,player1,player2,player3,player4,player5);
+	path14->setPlayer1(true);
 	AddRoom(path14);
 
 	name = "path21";
@@ -104,6 +107,7 @@ DataStore::DataStore()
 	row = 3;
 	col = 0;
 	Room* path30 = new Room(name,row,col,player0,player1,player2,player3,player4,player5);
+	path30->setPlayer4(true);
 	AddRoom(path30);
 
 	name = "path32";
@@ -122,12 +126,14 @@ DataStore::DataStore()
 	row = 4;
 	col = 1;
 	Room* path41 = new Room(name,row,col,player0,player1,player2,player3,player4,player5);
+	path41->setPlayer3(true);
 	AddRoom(path41);
 
 	name = "path43";
 	row = 4;
 	col = 3;
 	Room* path43 = new Room(name,row,col,player0,player1,player2,player3,player4,player5);
+	path43->setPlayer2(true);
 	AddRoom(path43);
 
 	name = "blank11";

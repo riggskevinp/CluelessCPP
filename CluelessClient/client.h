@@ -4,6 +4,10 @@
 #include <QDataStream>
 #include <QDialog>
 #include <QTcpSocket>
+#include <QTableView>
+
+#include "datastore.h"
+#include "boardmodel.h"
 
 class QComboBox;
 class QLabel;
@@ -20,13 +24,14 @@ public:
     explicit Client(QWidget *parent = nullptr);
     void decodeMessage(qint64 newMes);
     qint64 encodeMessage(qint64 m_player, qint64 m_ga, qint64 m_char, qint64 m_weap, qint64 m_row, qint64 m_col);
-    qint64 playerNumber = 0; // This lets the client know which player it is, it can use this to determine if a message is directed specifically for it
+    qint64 playerNumber = 6; // This lets the client know which player it is, it can use this to determine if a message is directed specifically for it
     qint64 i_playerNumber = 0; // same data as in the server
     qint64 i_GA = 0;
     qint64 i_character = 0;
     qint64 i_weapon = 0;
     qint64 i_row = 0;
     qint64 i_col = 0;
+
 
 
 private slots:
@@ -37,7 +42,9 @@ private slots:
     void sessionOpened();
     void sendMessage(); // be able to click sendMessage after being notified by server
     void receiveMessage();
-    void makeGuess();
+    void suggest();
+    void accuse();
+	void onDoubleClicked();
     void redSelected(){i_character = 0;}
     void yellowSelected(){i_character = 1;}
     void whiteSelected(){i_character = 2;}
@@ -63,6 +70,10 @@ private:
     QString currentFortune;
 
     QNetworkSession *networkSession = nullptr;
+
+	DataStore* store;
+	QTableView* tableView;
+	BoardModel* boardModel;
 
 };
 

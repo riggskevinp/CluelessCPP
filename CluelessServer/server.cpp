@@ -237,7 +237,7 @@ void Server::addPlayer()
 
         out << message;
         clientConnection->write(block);
-        sendMessageButton->setEnabled(true);
+        sendMessageButton->setEnabled(false);
         connect(clientConnection, &QIODevice::readyRead, this, &Server::receiveMessage);
     }
 
@@ -309,26 +309,41 @@ void Server::receiveMessage()
      *
      * Doesn't solve this, but receive message might belong inside of the player class? Maybe?
      */
-    in.setDevice(playerList[0]->getSocket()); //currently this is only listening to player[0], whenever
-    in.setVersion(QDataStream::Qt_5_10);
-    in.startTransaction();
+    //sender() can be used to get the object who emitted the signal
+    for(int i = 0; i < playerList.length(); i++){
+        in.setDevice(playerList[i]->getSocket());
+        in.setVersion(QDataStream::Qt_5_10);
+        in.startTransaction();
 
-    qint64 newMessage;
-    in >> newMessage;
-    decodeMessage(newMessage);
+        qint64 newMessage;
+        in >> newMessage;
+        if(in.commitTransaction()){
+            decodeMessage(newMessage);
+            notifyAll();
 
-    if(t_character != solCharacter){
-        // tell playerTurn the character was wrong
-        // notify all other players of guess
-        // set playerTurn to next player
-        //notifyAll();
-        answer(encodeMessage(t_playerNumber,2,t_character,6,5,5));
+            //create answer to guessing player
+            //if a guess is correct, send back an invalid int ie 6
+            if(t_character == solCharacter){
+                t_character = 6;
+            }
+            if(t_weapon == solWeapon){
+                t_weapon = 6;
+            }
+            if(t_row == solRow && t_col == solCol){
+                t_row = 5;
+                t_col = 5;
+            }
+            //what to do if all are correct? If it is a suggetion, nothing different,
+            //if it's an accusation, we need to do a notify all to tell the other players who won.
+            //we can use t_GA to say if they won, lost, etc.
+
+            answer(encodeMessage(t_playerNumber,2,t_character,t_weapon,t_row,t_col));
+            // Todo turn gameStatusLabel into a scrolling log of all updates
+            //gameStatusLabel->setText(newMessage);
+            gameStatusLabel->setText(tr("Player%1  GA%2  Character%3  Weapon%4  Row%5 Col%6").arg(t_playerNumber).arg(t_GA).arg(t_character).arg(t_weapon).arg(t_row).arg(t_col));
+        }
     }
-
-    // Todo turn gameStatusLabel into a scrolling log of all updates
-    //gameStatusLabel->setText(newMessage);
-    gameStatusLabel->setText(tr("Player%1  GA%2  Character%3  Weapon%4  Row%5 Col%6").arg(t_playerNumber).arg(t_GA).arg(t_character).arg(t_weapon).arg(t_row).arg(t_col));
-    sendMessageButton->setEnabled(true);
 }
+
 
 

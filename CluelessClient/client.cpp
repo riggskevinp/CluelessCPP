@@ -14,6 +14,9 @@ Client::Client(QWidget *parent)
     , joinGameButton(new QPushButton(tr("Join Game")))
     , sendMessageButton(new QPushButton(tr("Send Message")))
     , tcpSocket(new QTcpSocket(this))
+	, store(new DataStore())
+	, boardModel(new BoardModel(store))
+	, tableView(new QTableView)
 {
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
     hostCombo->setEditable(true);
@@ -132,13 +135,31 @@ Client::Client(QWidget *parent)
     // !!! BIG TODO !!!
     // We need to create roomobjects to populate the gameboard with
     // See https://github.com/riggskevinp/CluelessCPP/issues/1
-	DataStore* store = new DataStore();
-	QTableView* tableView = new QTableView;
-	tableView->setModel(new BoardModel(store));
+    //DataStore* store = new DataStore();
+    //QTableView* tableView = new QTableView;
+	//BoardModel* boardModel = new BoardModel(store);
+    tableView->setModel(boardModel);
+	tableView->setSelectionMode(QAbstractItemView::SingleSelection);
+	tableView->horizontalHeader()->setVisible(false);
+	tableView->setColumnWidth(0,110);
+	tableView->setColumnWidth(1,110);
+	tableView->setColumnWidth(2,110);
+	tableView->setColumnWidth(3,110);
+	tableView->setColumnWidth(4,110);
+	tableView->setRowHeight(0,110);
+	tableView->setRowHeight(1,110);
+	tableView->setRowHeight(2,110);
+	tableView->setRowHeight(3,110);
+	tableView->setRowHeight(4,110);
+	connect(tableView, &QAbstractItemView::doubleClicked, this, &Client::onDoubleClicked);
 
     // create a Guess button and connect it to the makeGuess slot
-    auto makeGuessButton = new QPushButton(tr("Make Guess"));
-    connect(makeGuessButton, &QAbstractButton::clicked, this, &Client::makeGuess);
+    auto makeSuggestButton = new QPushButton(tr("Suggest"));
+    connect(makeSuggestButton, &QAbstractButton::clicked, this, &Client::suggest);
+
+    // create a Accuse button and connect it to the accuse slot
+    auto makeAccuseButton = new QPushButton(tr("Accuse"));
+    connect(makeAccuseButton, &QAbstractButton::clicked, this, &Client::accuse);
 
     // A groupbox is created to hold both the character and weapon boxes
     // It also holds the makeGuessButton
@@ -146,7 +167,8 @@ Client::Client(QWidget *parent)
     QVBoxLayout *charWeapLayout = new QVBoxLayout;
     charWeapLayout->addWidget(charBox);
     charWeapLayout->addWidget(weapBox);
-    charWeapLayout->addWidget(makeGuessButton);
+    charWeapLayout->addWidget(makeSuggestButton);
+    charWeapLayout->addWidget(makeAccuseButton);
 
     charWeapBox->setLayout(charWeapLayout);
 
@@ -155,7 +177,7 @@ Client::Client(QWidget *parent)
     // Character Weapon box with make guess button added with gameBoard
     guessLayout->addWidget(charWeapBox);
     //guessLayout->addWidget(gameBoard);
-	guessLayout->addWidget(tableView);
+    guessLayout->addWidget(tableView);
     guessBox->setLayout(guessLayout);
 
 
@@ -380,27 +402,56 @@ void Client::receiveMessage()
     in >> newMessage;
     decodeMessage(newMessage);
 
+	if(playerNumber == 6){
+		playerNumber = i_playerNumber;
+		boardModel->setPlayerNumber(i_playerNumber);
+	}
+
     statusLabel->setText(tr("Player%1 GA%2 Char%3 Weap%4 Row%5 Col%6").arg(i_playerNumber).arg(i_GA).arg(i_character).arg(i_weapon).arg(i_row).arg(i_col));
     sendMessageButton->setEnabled(true);
 }
 
-void Client::makeGuess()
+void Client::suggest()
 {
     /*
      * This takes what the global variables are set to and sends that to the server
-     * This is connected to the guess button
+     * This is connected to the suggest button
      */
-
+    i_GA = 0;
     QByteArray block;
     QDataStream out(&block, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_5_10);
 
-    //Determine which Character
-    //Determine which Weapon
     //Determine location
 
-    qint64 message = encodeMessage(playerNumber,/* i_GA */ 0,i_character,i_weapon,i_row,i_col);
+    qint64 message = encodeMessage(playerNumber,i_GA,i_character,i_weapon,i_row,i_col);
     out << message;
 
     tcpSocket->write(block);
+}
+void Client::accuse()
+{
+    /*
+     * This takes what the global variables are set to and sends that to the server
+     * This is connected to the accuse button
+     */
+    i_GA = 1;
+    QByteArray block;
+    QDataStream out(&block, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_5_10);
+
+    //Determine location
+
+    qint64 message = encodeMessage(playerNumber,i_GA,i_character,i_weapon,i_row,i_col);
+    out << message;
+
+	tcpSocket->write(block);
+}
+
+void Client::onDoubleClicked()
+{
+	QModelIndex ind = tableView->currentIndex();
+	i_row = ind.row();
+	i_col = ind.column();
+	boardModel->onDoubleClick(&ind);
 }

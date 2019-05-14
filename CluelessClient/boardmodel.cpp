@@ -6,6 +6,11 @@ BoardModel::BoardModel(DataStore* store, QObject *parent) : m_store(store), QAbs
 {
 }
 
+void BoardModel::setPlayerNumber(int n_int)
+{
+	playerNumber = n_int;
+}
+
 QVariant BoardModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
 	// FIXME: Implement me!
@@ -76,6 +81,66 @@ bool BoardModel::insertRows(int position, int rows, const QModelIndex &index)
 	return true;
 }
 
+void BoardModel::onDoubleClick(QModelIndex* index)
+{
+	if(playerNumber == 0){
+		for(int row = 0; row < 5; row++){
+			for(int col = 0; col < 5; col++){
+				m_store->GetRoom(row,col)->setPlayer0(false);
+			}
+		}
+		m_store->GetRoom(index->row(), index->column())->setPlayer0(true);
+
+	}
+	if(playerNumber == 1){
+		for(int row = 0; row < 5; row++){
+			for(int col = 0; col < 5; col++){
+				m_store->GetRoom(row,col)->setPlayer1(false);
+			}
+		}
+		m_store->GetRoom(index->row(), index->column())->setPlayer1(true);
+
+	}
+	if(playerNumber == 2){
+		for(int row = 0; row < 5; row++){
+			for(int col = 0; col < 5; col++){
+				m_store->GetRoom(row,col)->setPlayer2(false);
+			}
+		}
+		m_store->GetRoom(index->row(), index->column())->setPlayer2(true);
+
+	}
+	if(playerNumber == 3){
+		for(int row = 0; row < 5; row++){
+			for(int col = 0; col < 5; col++){
+				m_store->GetRoom(row,col)->setPlayer3(false);
+			}
+		}
+		m_store->GetRoom(index->row(), index->column())->setPlayer3(true);
+
+	}
+	if(playerNumber == 4){
+		for(int row = 0; row < 5; row++){
+			for(int col = 0; col < 5; col++){
+				m_store->GetRoom(row,col)->setPlayer4(false);
+			}
+		}
+		m_store->GetRoom(index->row(), index->column())->setPlayer4(true);
+
+	}
+	if(playerNumber == 5){
+		for(int row = 0; row < 5; row++){
+			for(int col = 0; col < 5; col++){
+				m_store->GetRoom(row,col)->setPlayer5(false);
+			}
+		}
+		m_store->GetRoom(index->row(), index->column())->setPlayer5(true);
+
+	}
+	emit dataChanged(QModelIndex(), QModelIndex());
+	return;
+}
+
 int BoardModel::rowCount(const QModelIndex &parent) const
 {
 	if (parent.isValid())
@@ -103,22 +168,28 @@ QVariant BoardModel::data(const QModelIndex &index, int role) const
 
 	Room* room = m_store->GetRoom(index.row(), index.column());
 
-	// FIXME: Implement me!
-	/*
+	// Build up String to display:
+	QString t_status = " \n";
+	if(room->getPlayer0() == true){
+		t_status.append(" Player0Red \n");
+	}
+	if(room->getPlayer1() == true){
+		t_status.append(" Player1Yellow \n");
+	}
+	if(room->getPlayer2() == true){
+		t_status.append(" Player2White \n");
+	}
+	if(room->getPlayer3() == true){
+		t_status.append(" Player3Green \n");
+	}
+	if(room->getPlayer4() == true){
+		t_status.append(" Player4Blue \n");
+	}
+	if(room->getPlayer5() == true){
+		t_status.append(" Player5Purple \n");
+	}
 	if (role == Qt::DisplayRole || role == Qt::EditRole) {
-        switch (index.column()) {
-			case 0:
-				return room->name();
-			case 1:
-				return room->date();
-			case 2:
-				return room->gender();
-			case 3:
-				return room->salary();
-		}
-    }*/
-	if (role == Qt::DisplayRole || role == Qt::EditRole) {
-        return room->name();
+        return room->name().append(t_status);
     }
 
     return QVariant();
