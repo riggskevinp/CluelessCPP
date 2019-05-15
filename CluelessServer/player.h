@@ -7,6 +7,7 @@
 class Player
 {
 public:
+    // Simple player object that holds the client connections and allows the server to use access those connections for sending messages
     Player(QTcpSocket* socket);
     QTcpSocket* getSocket(void);
 
