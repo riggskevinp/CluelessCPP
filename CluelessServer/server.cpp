@@ -333,6 +333,17 @@ void Server::receiveMessage()
                 t_row = 5;
                 t_col = 5;
             }
+
+            if (t_character == 6 && t_weapon == 6 && t_row == 5 && t_col == 5) {
+                //if above is satisfied, guess is correct
+                if (t_GA == 1){
+                    t_GA = 3;
+                }
+                else {
+                    t_GA = 4;
+                }
+
+            }
             //what to do if all are correct? If it is a suggetion, nothing different,
             //if it's an accusation, we need to do a notify all to tell the other players who won.
             //we can use t_GA to say if they won, lost, etc.
