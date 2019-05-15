@@ -333,11 +333,22 @@ void Server::receiveMessage()
                 t_row = 5;
                 t_col = 5;
             }
+
+            if (t_character == 6 && t_weapon == 6 && t_row == 5 && t_col == 5) {
+                //if above is satisfied, guess is correct
+                if (t_GA == 1){
+                    t_GA = 3;
+                }
+                else {
+                    t_GA = 4;
+                }
+
+            }
             //what to do if all are correct? If it is a suggetion, nothing different,
             //if it's an accusation, we need to do a notify all to tell the other players who won.
             //we can use t_GA to say if they won, lost, etc.
 
-            answer(encodeMessage(t_playerNumber,2,t_character,t_weapon,t_row,t_col));
+            answer(encodeMessage(t_playerNumber,t_GA,t_character,t_weapon,t_row,t_col));
             // Todo turn gameStatusLabel into a scrolling log of all updates
             //gameStatusLabel->setText(newMessage);
             gameStatusLabel->setText(tr("Player%1  GA%2  Character%3  Weapon%4  Row%5 Col%6").arg(t_playerNumber).arg(t_GA).arg(t_character).arg(t_weapon).arg(t_row).arg(t_col));

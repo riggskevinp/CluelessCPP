@@ -405,7 +405,10 @@ void Client::receiveMessage()
 	if(playerNumber == 6){
 		playerNumber = i_playerNumber;
 		boardModel->setPlayerNumber(i_playerNumber);
-	}
+        }
+    if(i_GA == 3){
+        QMessageBox::information(this, tr("Game Over"), tr("Game has Ended. Player %1 has won.").arg(i_playerNumber));
+    }
 
     statusLabel->setText(tr("Player%1 GA%2 Char%3 Weap%4 Row%5 Col%6").arg(i_playerNumber).arg(i_GA).arg(i_character).arg(i_weapon).arg(i_row).arg(i_col));
     sendMessageButton->setEnabled(true);
